@@ -2,6 +2,8 @@
 
 Exports syslog-ng statistics via HTTP for Prometheus consumption.
 
+## Running
+
 Help on flags:
 
 ```
@@ -17,17 +19,6 @@ Help on flags:
 ```
 
 Tested with syslog-ng 3.5.6, 3.20.1, and 3.22.1
-
-# Running
-
-## Using Docker
-```
-docker run -d -p 9577:9577 -v /var/lib/syslog-ng/syslog-ng.ctl:/syslog-ng.ctl \
-  brandond/syslog_ng_exporter --socket.path=/syslog-ng.ctl
-```
-
-
-# Details
 
 ## Collectors
 

@@ -1,0 +1,88 @@
+project_name: syslog_ng_exporter
+
+env:
+  - GO111MODULE=on
+
+before:
+  hooks:
+    - go generate ./...
+    - go mod download
+
+builds:
+
+  - id: dynamic
+    binary: syslog_ng_exporter
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "-s -w"
+    flags:
+      - -tags=release
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "6"
+      - "7"
+
+  - id: static
+    binary: syslog_ng_exporter
+    env:
+      - CGO_ENABLED=1
+    ldflags:
+      - "-linkmode external -extldflags -static"
+    flags:
+      - -tags=release
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    overrides:
+      - goos: linux
+        goarch: amd64
+        env:
+          - CC=gcc
+
+      - goos: linux
+        goarch: arm64
+        env:
+          - CC=aarch64-linux-gnu-gcc
+
+archives:
+
+  - id: archive_multi
+    builds: [dynamic]
+    name_template: >-
+      {{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    wrap_in_directory: true
+    files:
+      - none*
+
+  - id: archive_static
+    builds: [static]
+    name_template: >-
+      {{ .ProjectName }}_static-{{ .Version }}.{{ .Os }}-{{ .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format: tar.gz
+    wrap_in_directory: true
+    files:
+      - none*
+
+release:
+  github:
+    owner: jbox-web
+    name: syslog_ng_exporter
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}}-v{{.Version}}"
